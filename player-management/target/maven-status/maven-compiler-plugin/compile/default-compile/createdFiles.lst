@@ -1,0 +1,6 @@
+com\docker_spring_cloud\player_management\PlayerManagementApplication.class
+com\docker_spring_cloud\player_management\repo\PlayerRepo.class
+com\docker_spring_cloud\player_management\model\PlayerDTO.class
+com\docker_spring_cloud\player_management\mapper\PlayerMapper.class
+com\docker_spring_cloud\player_management\controller\PlayerController.class
+com\docker_spring_cloud\player_management\entity\Player.class

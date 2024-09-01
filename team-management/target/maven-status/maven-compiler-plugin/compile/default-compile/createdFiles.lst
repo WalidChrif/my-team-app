@@ -1,0 +1,6 @@
+com\docker_spring_cloud\team_management\entity\Team.class
+com\docker_spring_cloud\team_management\controller\TeamController.class
+com\docker_spring_cloud\team_management\mapper\TeamMapper.class
+com\docker_spring_cloud\team_management\model\TeamDTO.class
+com\docker_spring_cloud\team_management\TeamManagementApplication.class
+com\docker_spring_cloud\team_management\repo\TeamRepo.class

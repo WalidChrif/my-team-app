@@ -1,0 +1,161 @@
+version: '3.8'
+services:
+  eureka-server:
+    build:
+      context: eureka-server
+      dockerfile: Dockerfile
+    image: walidchrifd/eureka-server
+    container_name: eureka-server
+    ports:
+      - "8761:8761"
+    depends_on:
+      - zipkin
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      SPRING.ZIPKIN.BASEURL: http://zipkin:9411/
+      MANAGEMENT.ZIPKIN.TRACING.ENDPOINT:  http://zipkin:9411/api/v2/spans
+  api-gateway:
+    build:
+      context: api-gateway
+      dockerfile: Dockerfile
+    image: walidchrifd/api-gateway
+    container_name: api-gateway
+    ports:
+      - "8765:8765"
+    depends_on:
+      - zipkin
+      - eureka-server
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      MANAGEMENT.ZIPKIN.TRACING.ENDPOINT:  http://zipkin:9411/api/v2/spans
+  staff:
+    build:
+      context: staff-management
+      dockerfile: Dockerfile
+    image: walidchrifd/staff-management
+    container_name: staff-management
+    ports:
+      - "8200:8200"
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/staff
+      SPRING_DATASOURCE_USERNAME: user
+      SPRING_DATASOURCE_PASSWORD: pass
+      SPRING.ZIPKIN.BASEURL: http://zipkin:9411/
+      MANAGEMENT.ZIPKIN.TRACING.ENDPOINT:  http://zipkin:9411/api/v2/spans
+    depends_on:
+      - zipkin
+      - eureka-server
+      - api-gateway
+      - mysql
+#      - kafka
+  teams:
+    build:
+      context: team-management
+      dockerfile: Dockerfile
+    image: walidchrifd/team-management
+    container_name: team-management
+    ports:
+      - "8000:8000"
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      SPRING_DATA_MONGODB_URI: mongodb://mongodb-teams:27017/teams
+      SPRING.ZIPKIN.BASEURL: http://zipkin:9411/
+      MANAGEMENT.ZIPKIN.TRACING.ENDPOINT:  http://zipkin:9411/api/v2/spans
+    depends_on:
+      - zipkin
+      - eureka-server
+      - api-gateway
+      - mongodb-teams
+      - kafka
+  players:
+    build:
+      context: player-management
+      dockerfile: Dockerfile
+    image: walidchrifd/player-management
+    container_name: player-management
+    ports:
+      - "8100:8100"
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      SPRING_DATA_MONGODB_URI: mongodb://mongodb-players:27017/players
+      SPRING.ZIPKIN.BASEURL: http://zipkin:9411/
+      MANAGEMENT.ZIPKIN.TRACING.ENDPOINT:  http://zipkin:9411/api/v2/spans
+    depends_on:
+      - zipkin
+      - eureka-server
+      - api-gateway
+      - mongodb-players
+      - kafka
+  notification-service:
+    build:
+      context: notification-service
+      dockerfile: Dockerfile
+    image: walidchrifd/notification-service
+    container_name: notification-service
+    ports:
+      - "8300:8300"
+    depends_on:
+      - zipkin
+      - eureka-server
+      - api-gateway
+      - kafka
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      SPRING.ZIPKIN.BASEURL: http://zipkin:9411/
+      MANAGEMENT.ZIPKIN.TRACING.ENDPOINT:  http://zipkin:9411/api/v2/spans
+  mysql:
+    image: mysql
+    container_name: mysql-staff
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: staff
+      MYSQL_USER: user
+      MYSQL_PASSWORD: pass
+  mongodb-teams:
+    image: mongo
+    container_name: mongodb-teams
+    ports:
+      - "27017:27017"
+  mongodb-players:
+    image: mongo
+    container_name: mongodb-players
+    ports:
+      - "27018:27017"
+  zipkin:
+    image: openzipkin/zipkin
+    container_name: openzipkin
+    ports:
+      - "9411:9411"
+  zookeeper:
+    image: confluentinc/cp-zookeeper:latest
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    ports:
+      - "22181:2181"
+  kafka:
+    image: confluentinc/cp-kafka:latest
+    depends_on:
+      - zookeeper
+    ports:
+      - "29092:29092"
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ADVERTISED_HOST_NAME: 127.0.0.1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,PLAINTEXT_HOST://localhost:29092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+#  kafka-ui:
+#    image: provectuslabs/kafka-ui:latest
+#    depends_on:
+#      - kafka
+#    ports:
+#      - "8090:8080"
+#    environment:
+#      KAFKA_CLUSTERS_0_NAME: local
+#      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:9092
+#      KAFKA_CLUSTERS_0_ZOOKEEPER: zookeeper:2181
+

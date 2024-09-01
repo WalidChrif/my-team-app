@@ -1,0 +1,1 @@
+try spring.zipkin.baseurl on some services and test it without docker and with docker
