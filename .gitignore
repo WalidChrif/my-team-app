@@ -47,3 +47,7 @@ application*.properties
 # Docker-specific
 docker-compose.yml
 .dockerignore
+
+git rm -r --cached logs/
+git commit -m "Stop tracking logs folder"
+git push origin main
