@@ -1,7 +1,5 @@
 package com.docker_spring_cloud.player_management.model;
 
-import org.springframework.data.annotation.Id;
-
 public class PlayerDTO {
     
     private String id;
